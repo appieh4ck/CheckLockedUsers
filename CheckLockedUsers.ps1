@@ -48,23 +48,32 @@ $lblAantalLocks.location         = New-Object System.Drawing.Point(41,602)
 $lblAantalLocks.Font             = 'Microsoft Sans Serif,21'
 $lblAantalLocks.ForeColor        = "#f0ff00"
 
-$Form.controls.AddRange(@($ListBox1,$btnCheckLocked,$btnUnlockSelected,$btnUnlockAll,$lblAantalLocks))
+$btnPath                         = New-Object system.Windows.Forms.Button
+$btnPath.text                    = "Log path"
+$btnPath.width                   = 60
+$btnPath.height                  = 30
+$btnPath.location                = New-Object System.Drawing.Point(361,529)
+$btnPath.Font                    = 'Microsoft Sans Serif,10'
+
+$Form.controls.AddRange(@($ListBox1,$btnCheckLocked,$btnUnlockSelected,$btnUnlockAll,$lblAantalLocks, $btnPath))
 
 $btnCheckLocked.Add_MouseClick({ CheckLockState })
 $ListBox1.Add_DoubleClick({ UnlockSelected })
 $btnUnlockAll.Add_Click({ UnlockAll })
+$btnPath.Add_MouseClick({ logPath })
 
 function UnlockAll { }
 function UnlockSelected { }
 function CheckLockState { }
-
+function logPath {}
 
 
 #Write your logic code here
 $teller = 0
+$path = '.\LockedUsers.csv'
 function CheckLockState {
     $Listbox1.Items.Clear()
-        Search-ADAccount -LockedOut | Select-Object -Property Name,LastLogonDate | Export-Csv -Path 'C:\Users\abderahman.mahmoud\OneDrive - Royal Reesink B.V\LockedUsers.csv' -Append
+        Search-ADAccount -LockedOut | Select-Object -Property Name,LastLogonDate | Export-Csv -Path $path -Append
         $AllLockedUsers = Search-ADAccount -LockedOut 
         
         ForEach ($user in $AllLockedUsers)
@@ -84,4 +93,10 @@ function UnlockAll{
     Search-ADAccount -LockedOut | Unlock-ADAccount
     $Listbox1.Items.Clear()
 }
+
+function logPath{
+[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
+$path = [Microsoft.VisualBasic.Interaction]::InputBox("Enter path for log file", "Path logfile", "C:\")
+}
+
 [void]$Form.ShowDialog()
